@@ -5,17 +5,13 @@ import '../game/game_engine.dart';
 import '../models/code.dart';
 import '../models/feedback.dart';
 import '../models/guess_entry.dart';
-import '../models/match_state.dart';
 import '../widgets/code_input.dart';
 import '../widgets/feedback_input.dart';
 import '../widgets/info_bar.dart';
 import '../widgets/peg_board.dart';
-import 'score_screen.dart';
 
 class ComputerGuessesScreen extends StatefulWidget {
-  final MatchState matchState;
-
-  const ComputerGuessesScreen({super.key, required this.matchState});
+  const ComputerGuessesScreen({super.key});
 
   @override
   State<ComputerGuessesScreen> createState() => _ComputerGuessesScreenState();
@@ -75,7 +71,6 @@ class _ComputerGuessesScreenState extends State<ComputerGuessesScreen> {
 
       if (feedback.isCorrect) {
         _solved = true;
-        widget.matchState.computerGuesses = _guesses.length;
         _currentGuess = null;
         _currentEntropy = null;
       } else {
@@ -85,12 +80,7 @@ class _ComputerGuessesScreenState extends State<ComputerGuessesScreen> {
   }
 
   void _proceed() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => ScoreScreen(matchState: widget.matchState),
-      ),
-    );
+    Navigator.pop(context);
   }
 
   @override
@@ -98,7 +88,7 @@ class _ComputerGuessesScreenState extends State<ComputerGuessesScreen> {
     if (_needsSecret) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Round 2: AI\'s Turn'),
+          title: const Text('AI Cracks Your Code'),
           automaticallyImplyLeading: false,
         ),
         body: Center(
@@ -132,7 +122,7 @@ class _ComputerGuessesScreenState extends State<ComputerGuessesScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Round 2: AI\'s Turn'),
+        title: const Text('AI Cracks Your Code'),
         automaticallyImplyLeading: false,
       ),
       body: Column(
@@ -188,8 +178,8 @@ class _ComputerGuessesScreenState extends State<ComputerGuessesScreen> {
                   const SizedBox(height: 12),
                   ElevatedButton.icon(
                     onPressed: _proceed,
-                    icon: const Icon(Icons.scoreboard),
-                    label: const Text('See Results'),
+                    icon: const Icon(Icons.home),
+                    label: const Text('Play Again'),
                   ),
                 ],
               ),

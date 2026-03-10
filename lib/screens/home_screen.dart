@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../models/match_state.dart';
 import 'human_guesses_screen.dart';
+import 'computer_guesses_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -10,54 +10,81 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.psychology,
-              size: 80,
-              color: Colors.amber,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'MASTERMIND',
-              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 4,
-                  ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '4 pegs · 6 colors · 1296 possibilities',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey,
-                  ),
-            ),
-            const SizedBox(height: 48),
-            _buildRulesCard(context),
-            const SizedBox(height: 32),
-            ElevatedButton.icon(
-              onPressed: () {
-                final matchState = MatchState();
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        HumanGuessesScreen(matchState: matchState),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.play_arrow),
-              label: const Text('Start Match'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 32,
-                  vertical: 16,
-                ),
-                textStyle: const TextStyle(fontSize: 18),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(vertical: 48),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.psychology,
+                size: 80,
+                color: Colors.amber,
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+              Text(
+                'MASTERMIND',
+                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 4,
+                    ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '4 pegs · 6 colors · 1296 possibilities',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.grey,
+                    ),
+              ),
+              const SizedBox(height: 48),
+              _buildRulesCard(context),
+              const SizedBox(height: 40),
+              Text(
+                'Choose your mode',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Colors.grey,
+                    ),
+              ),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _ModeButton(
+                        icon: Icons.search,
+                        label: "I'll crack\nthe code",
+                        color: Colors.amber,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const HumanGuessesScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _ModeButton(
+                        icon: Icons.smart_toy,
+                        label: 'AI cracks\nmy code',
+                        color: Colors.cyanAccent,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const ComputerGuessesScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -80,15 +107,15 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 12),
             const _RuleRow(
               number: '1',
-              text: 'You crack the computer\'s secret code',
+              text: 'One player picks a secret 4-peg code',
             ),
             const _RuleRow(
               number: '2',
-              text: 'The AI cracks your secret code',
+              text: 'The other guesses, getting feedback each turn',
             ),
             const _RuleRow(
               number: '3',
-              text: 'Fewest guesses wins!',
+              text: 'Crack the code in as few guesses as possible!',
             ),
             const SizedBox(height: 12),
             Row(
@@ -120,6 +147,55 @@ class HomeScreen extends StatelessWidget {
         const SizedBox(width: 4),
         Text(label, style: const TextStyle(fontSize: 11)),
       ],
+    );
+  }
+}
+
+class _ModeButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _ModeButton({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: color.withValues(alpha: 0.1),
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: color.withValues(alpha: 0.3), width: 1.5),
+          ),
+          child: Column(
+            children: [
+              Icon(icon, size: 40, color: color),
+              const SizedBox(height: 12),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: color,
+                  height: 1.3,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

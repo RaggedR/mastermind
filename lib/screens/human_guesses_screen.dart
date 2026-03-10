@@ -3,15 +3,11 @@ import 'package:flutter/material.dart';
 import '../game/game_engine.dart';
 import '../models/code.dart';
 import '../models/guess_entry.dart';
-import '../models/match_state.dart';
 import '../widgets/code_input.dart';
 import '../widgets/info_bar.dart';
-import 'computer_guesses_screen.dart';
 
 class HumanGuessesScreen extends StatefulWidget {
-  final MatchState matchState;
-
-  const HumanGuessesScreen({super.key, required this.matchState});
+  const HumanGuessesScreen({super.key});
 
   @override
   State<HumanGuessesScreen> createState() => _HumanGuessesScreenState();
@@ -47,19 +43,8 @@ class _HumanGuessesScreenState extends State<HumanGuessesScreen> {
       _guesses.add(GuessEntry(guess: guess, feedback: feedback));
       if (feedback.isCorrect) {
         _solved = true;
-        widget.matchState.humanGuesses = _guesses.length;
       }
     });
-  }
-
-  void _proceed() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) =>
-            ComputerGuessesScreen(matchState: widget.matchState),
-      ),
-    );
   }
 
   @override
@@ -68,8 +53,7 @@ class _HumanGuessesScreenState extends State<HumanGuessesScreen> {
     print('BUILD: remaining=${_remaining.length}, guesses=${_guesses.length}');
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Round 1: Your Turn'),
-        automaticallyImplyLeading: false,
+        title: const Text('Crack the Code'),
       ),
       body: Column(
         children: [
@@ -170,9 +154,9 @@ class _HumanGuessesScreenState extends State<HumanGuessesScreen> {
                   ),
                   const SizedBox(height: 12),
                   ElevatedButton.icon(
-                    onPressed: _proceed,
-                    icon: const Icon(Icons.arrow_forward),
-                    label: const Text('Next: AI\'s Turn'),
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.home),
+                    label: const Text('Play Again'),
                   ),
                 ],
               ),
