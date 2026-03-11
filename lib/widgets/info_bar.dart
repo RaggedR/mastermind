@@ -15,8 +15,6 @@ class InfoBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final totalBits = remainingCount > 1 ? (log(remainingCount) / ln2) : 0.0;
-    // ignore: avoid_print
-    print('INFOBAR: remainingCount=$remainingCount, totalBits=$totalBits, entropyBits=$entropyBits');
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

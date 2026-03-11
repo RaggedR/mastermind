@@ -66,12 +66,30 @@ class _CodeInputState extends State<CodeInput> {
                 width: 52,
                 height: 52,
                 decoration: BoxDecoration(
-                  color: _pegs[i]?.color ?? Colors.grey.shade800,
+                  gradient: _pegs[i] != null
+                      ? RadialGradient(
+                          center: const Alignment(-0.3, -0.3),
+                          colors: [
+                            Color.lerp(_pegs[i]!.color, Colors.white, 0.3)!,
+                            _pegs[i]!.color,
+                            Color.lerp(_pegs[i]!.color, Colors.black, 0.2)!,
+                          ],
+                          stops: const [0.0, 0.5, 1.0],
+                        )
+                      : null,
+                  color: _pegs[i] == null ? Colors.grey.shade800 : null,
                   shape: BoxShape.circle,
                   border: Border.all(
                     color: isSelected ? Colors.amber : Colors.white24,
                     width: isSelected ? 3 : 1.5,
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: _pegs[i] != null ? 0.45 : 0.2),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: _pegs[i] == null
                     ? Center(

@@ -35,16 +35,7 @@ class HomeScreen extends StatelessWidget {
                       color: Colors.grey,
                     ),
               ),
-              const SizedBox(height: 48),
-              _buildRulesCard(context),
-              const SizedBox(height: 40),
-              Text(
-                'Choose your mode',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Colors.grey,
-                    ),
-              ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 32),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 32),
                 child: Row(
@@ -83,6 +74,8 @@ class HomeScreen extends StatelessWidget {
                   ],
                 ),
               ),
+              const SizedBox(height: 32),
+              _buildRulesCard(context),
             ],
           ),
         ),

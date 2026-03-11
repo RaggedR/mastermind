@@ -7,6 +7,7 @@ void main() {
     await tester.pumpWidget(const MastermindApp());
 
     expect(find.text('MASTERMIND'), findsOneWidget);
-    expect(find.text('Start Match'), findsOneWidget);
+    expect(find.text("I'll crack\nthe code"), findsOneWidget);
+    expect(find.text('AI cracks\nmy code'), findsOneWidget);
   });
 }

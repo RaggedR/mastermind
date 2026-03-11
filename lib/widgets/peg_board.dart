@@ -61,9 +61,20 @@ class PegBoard extends StatelessWidget {
       width: 36,
       height: 36,
       decoration: BoxDecoration(
-        color: peg.color,
+        gradient: RadialGradient(
+          center: const Alignment(-0.3, -0.3),
+          colors: [
+            Color.lerp(peg.color, Colors.white, 0.3)!,
+            peg.color,
+            Color.lerp(peg.color, Colors.black, 0.2)!,
+          ],
+          stops: const [0.0, 0.5, 1.0],
+        ),
         shape: BoxShape.circle,
         border: Border.all(color: Colors.white24, width: 1),
+        boxShadow: const [
+          BoxShadow(color: Colors.black45, blurRadius: 4, offset: Offset(0, 2)),
+        ],
       ),
     );
   }

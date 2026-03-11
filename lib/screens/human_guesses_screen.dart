@@ -18,39 +18,98 @@ class _HumanGuessesScreenState extends State<HumanGuessesScreen> {
   final List<GuessEntry> _guesses = [];
   bool _solved = false;
   List<Code> _remaining = List.of(allCodes);
+  double _panelFraction = 0.0; // 0 = front on top, 1 = front gone
+  double _maxSlide = 400;
 
   @override
   void initState() {
     super.initState();
     _secret = GameEngine.randomCode();
-    // ignore: avoid_print
-    print('SECRET: $_secret');
   }
 
   void _onGuess(Code guess) {
     final feedback = GameEngine.computeFeedback(guess, _secret);
-    // ignore: avoid_print
-    print('GUESS: $guess → ${feedback.black}B ${feedback.white}W');
 
     _remaining = _remaining.where((code) {
       return GameEngine.computeFeedback(guess, code) == feedback;
     }).toList();
 
-    // ignore: avoid_print
-    print('REMAINING: ${_remaining.length}');
-
     setState(() {
       _guesses.add(GuessEntry(guess: guess, feedback: feedback));
+      // Auto-reveal enough to show the guesses
+      _panelFraction = (_guesses.length * 0.12).clamp(0.0, 0.6);
       if (feedback.isCorrect) {
         _solved = true;
       }
     });
   }
 
+  Widget _buildPeg(Color c, {double size = 36}) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 3),
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        gradient: RadialGradient(
+          center: const Alignment(-0.3, -0.3),
+          colors: [
+            Color.lerp(c, Colors.white, 0.3)!,
+            c,
+            Color.lerp(c, Colors.black, 0.2)!,
+          ],
+          stops: const [0.0, 0.5, 1.0],
+        ),
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white24, width: 1),
+        boxShadow: const [
+          BoxShadow(
+              color: Colors.black45, blurRadius: 4, offset: Offset(0, 2)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDragHandle() {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onVerticalDragUpdate: (details) {
+        setState(() {
+          // Drag down → front slides down → reveals history
+          _panelFraction =
+              (_panelFraction + details.primaryDelta! / _maxSlide)
+                  .clamp(0.0, 1.0);
+        });
+      },
+      onTap: () {
+        setState(() {
+          _panelFraction = _panelFraction > 0.5 ? 0.0 : 1.0;
+        });
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        child: Center(
+          child: Container(
+            width: 60,
+            height: 6,
+            decoration: BoxDecoration(
+              color: Colors.amber.shade400,
+              borderRadius: BorderRadius.circular(3),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.amber.withValues(alpha: 0.3),
+                  blurRadius: 6,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // ignore: avoid_print
-    print('BUILD: remaining=${_remaining.length}, guesses=${_guesses.length}');
     return Scaffold(
       appBar: AppBar(
         title: const Text('Crack the Code'),
@@ -63,7 +122,8 @@ class _HumanGuessesScreenState extends State<HumanGuessesScreen> {
           ),
           if (_remaining.length <= 6 && _remaining.isNotEmpty && !_solved)
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
               child: Column(
                 children: [
                   Text(
@@ -91,21 +151,12 @@ class _HumanGuessesScreenState extends State<HumanGuessesScreen> {
                         children: [
                           for (int i = 0; i < 4; i++)
                             Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 2),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 2),
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Container(
-                                    width: 28,
-                                    height: 28,
-                                    decoration: BoxDecoration(
-                                      color: code[i].color,
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                          color: Colors.white24, width: 1),
-                                    ),
-                                  ),
+                                  _buildPeg(code[i].color, size: 28),
                                   Text(
                                     code[i].label[0],
                                     style: const TextStyle(
@@ -121,25 +172,7 @@ class _HumanGuessesScreenState extends State<HumanGuessesScreen> {
                 ],
               ),
             ),
-          Expanded(
-            child: _guesses.isEmpty
-                ? const Center(
-                    child: Text(
-                      'No guesses yet',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  )
-                : ListView.builder(
-                    itemCount: _guesses.length,
-                    itemBuilder: (context, index) {
-                      final entry = _guesses[index];
-                      return _GuessRow(
-                        index: index + 1,
-                        entry: entry,
-                      );
-                    },
-                  ),
-          ),
+          // Victory text above the stack when solved
           if (_solved)
             Padding(
               padding: const EdgeInsets.all(16),
@@ -147,10 +180,11 @@ class _HumanGuessesScreenState extends State<HumanGuessesScreen> {
                 children: [
                   Text(
                     'Cracked it in ${_guesses.length} guesses!',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          color: Colors.greenAccent,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    style:
+                        Theme.of(context).textTheme.headlineSmall?.copyWith(
+                              color: Colors.greenAccent,
+                              fontWeight: FontWeight.bold,
+                            ),
                   ),
                   const SizedBox(height: 12),
                   ElevatedButton.icon(
@@ -160,12 +194,70 @@ class _HumanGuessesScreenState extends State<HumanGuessesScreen> {
                   ),
                 ],
               ),
-            )
-          else
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: CodeInput(onSubmit: _onGuess),
             ),
+          // Main area: BACK (history) with FRONT (CodeInput) on top
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final maxH = constraints.maxHeight;
+                _maxSlide = maxH;
+                final slideOffset = maxH * _panelFraction;
+
+                return Stack(
+                  clipBehavior: Clip.hardEdge,
+                  children: [
+                    // BACK: scrollable guess history (always full size)
+                    Positioned.fill(
+                      child: _guesses.isEmpty
+                          ? const Center(
+                              child: Text('No guesses yet',
+                                  style: TextStyle(color: Colors.grey)),
+                            )
+                          : ListView.builder(
+                              padding: EdgeInsets.zero,
+                              itemCount: _guesses.length,
+                              itemBuilder: (context, index) {
+                                return _GuessRow(
+                                  index: index + 1,
+                                  entry: _guesses[index],
+                                );
+                              },
+                            ),
+                    ),
+                    // FRONT: CodeInput panel (slides down, clipped at bottom)
+                    if (!_solved)
+                      Positioned(
+                        top: slideOffset,
+                        left: 0,
+                        right: 0,
+                        height: maxH,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade900,
+                            border: Border(
+                              top: BorderSide(
+                                  color:
+                                      Colors.white.withValues(alpha: 0.2),
+                                  width: 2),
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              _buildDragHandle(),
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                    16, 0, 16, 16),
+                                child: CodeInput(onSubmit: _onGuess),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),
+          ),
         ],
       ),
     );
@@ -200,9 +292,11 @@ class _GuessRow extends StatelessWidget {
           _colorPeg(entry.guess[3]),
           const SizedBox(width: 16),
           const Text('→  ', style: TextStyle(fontSize: 18)),
-          _feedbackChip(fb.black, '✓ exact', const Color(0xFF2E7D32), Colors.white),
+          _feedbackChip(
+              fb.black, ' ✓', const Color(0xFF2E7D32), Colors.white),
           const SizedBox(width: 6),
-          _feedbackChip(fb.white, '~ wrong spot', const Color(0xFFF57F17), Colors.white),
+          _feedbackChip(
+              fb.white, ' ~', const Color(0xFFF57F17), Colors.white),
         ],
       ),
     );
@@ -210,13 +304,25 @@ class _GuessRow extends StatelessWidget {
 
   Widget _colorPeg(PegColor peg) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 3),
-      width: 36,
-      height: 36,
+      margin: const EdgeInsets.symmetric(horizontal: 2),
+      width: 30,
+      height: 30,
       decoration: BoxDecoration(
-        color: peg.color,
+        gradient: RadialGradient(
+          center: const Alignment(-0.3, -0.3),
+          colors: [
+            Color.lerp(peg.color, Colors.white, 0.3)!,
+            peg.color,
+            Color.lerp(peg.color, Colors.black, 0.2)!,
+          ],
+          stops: const [0.0, 0.5, 1.0],
+        ),
         shape: BoxShape.circle,
         border: Border.all(color: Colors.white24, width: 1),
+        boxShadow: const [
+          BoxShadow(
+              color: Colors.black45, blurRadius: 4, offset: Offset(0, 2)),
+        ],
       ),
     );
   }
