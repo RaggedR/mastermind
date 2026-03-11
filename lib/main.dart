@@ -1,6 +1,15 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'screens/home_screen.dart';
+
+class AppScrollBehavior extends MaterialScrollBehavior {
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.trackpad,
+      };
+}
 
 void main() {
   runApp(const MastermindApp());
@@ -14,6 +23,7 @@ class MastermindApp extends StatelessWidget {
     return MaterialApp(
       title: 'Mastermind',
       debugShowCheckedModeBanner: false,
+      scrollBehavior: AppScrollBehavior(),
       theme: ThemeData(
         brightness: Brightness.dark,
         colorScheme: ColorScheme.fromSeed(

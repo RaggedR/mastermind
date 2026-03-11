@@ -1,5 +1,7 @@
 # Mastermind — Entropy-Maximizing AI
 
+**[Play it live](https://raggedr.github.io/mastermind/)**
+
 A Flutter implementation of the classic Mastermind code-breaking game where a
 human and an entropy-maximizing AI take turns as codebreaker, then compare
 scores.
