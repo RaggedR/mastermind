@@ -1,3 +1,8 @@
+import 'dart:ui';
+
+const Color kFeedbackExactColor = Color(0xFF2E7D32);
+const Color kFeedbackMisplacedColor = Color(0xFFF57F17);
+
 class GuessFeedback {
   final int black;
   final int white;

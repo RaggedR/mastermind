@@ -26,7 +26,7 @@ class _ComputerGuessesScreenState extends State<ComputerGuessesScreen> {
   Code? _humanSecret;
   String? _errorMessage;
   double _panelFraction = 0.0; // 0 = front on top, 1 = front gone
-  double _maxSlide = 400;
+
 
   @override
   void initState() {
@@ -106,13 +106,13 @@ class _ComputerGuessesScreenState extends State<ComputerGuessesScreen> {
     );
   }
 
-  Widget _buildDragHandle() {
+  Widget _buildDragHandle(double maxSlide) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onVerticalDragUpdate: (details) {
         setState(() {
           _panelFraction =
-              (_panelFraction + details.primaryDelta! / _maxSlide)
+              (_panelFraction + details.primaryDelta! / maxSlide)
                   .clamp(0.0, 1.0);
         });
       },
@@ -162,7 +162,7 @@ class _ComputerGuessesScreenState extends State<ComputerGuessesScreen> {
             padding:
                 const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: const Color(0xFF2E7D32),
+              color: kFeedbackExactColor,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Colors.white38, width: 1),
             ),
@@ -179,7 +179,7 @@ class _ComputerGuessesScreenState extends State<ComputerGuessesScreen> {
             padding:
                 const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: const Color(0xFFF57F17),
+              color: kFeedbackMisplacedColor,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Colors.white38, width: 1),
             ),
@@ -202,7 +202,6 @@ class _ComputerGuessesScreenState extends State<ComputerGuessesScreen> {
       return Scaffold(
         appBar: AppBar(
           title: const Text('AI Cracks Your Code'),
-          automaticallyImplyLeading: false,
         ),
         body: Center(
           child: Padding(
@@ -236,7 +235,6 @@ class _ComputerGuessesScreenState extends State<ComputerGuessesScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('AI Cracks Your Code'),
-        automaticallyImplyLeading: false,
       ),
       body: Column(
         children: [
@@ -291,7 +289,6 @@ class _ComputerGuessesScreenState extends State<ComputerGuessesScreen> {
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final maxH = constraints.maxHeight;
-                _maxSlide = maxH;
                 final slideOffset = maxH * _panelFraction;
 
                 return Stack(
@@ -331,7 +328,7 @@ class _ComputerGuessesScreenState extends State<ComputerGuessesScreen> {
                           ),
                           child: Column(
                             children: [
-                              _buildDragHandle(),
+                              _buildDragHandle(maxH),
                               Expanded(
                                 child: SingleChildScrollView(
                                   child: Column(

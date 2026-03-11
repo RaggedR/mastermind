@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../game/game_engine.dart';
 import '../models/code.dart';
+import '../models/feedback.dart';
 import '../models/guess_entry.dart';
 import '../widgets/code_input.dart';
 import '../widgets/info_bar.dart';
@@ -19,20 +20,26 @@ class _HumanGuessesScreenState extends State<HumanGuessesScreen> {
   bool _solved = false;
   List<Code> _remaining = List.of(allCodes);
   double _panelFraction = 0.0; // 0 = front on top, 1 = front gone
-  double _maxSlide = 400;
+
 
   @override
   void initState() {
     super.initState();
     _secret = GameEngine.randomCode();
+    // ignore: avoid_print
+    print('SECRET: $_secret');
   }
 
   void _onGuess(Code guess) {
     final feedback = GameEngine.computeFeedback(guess, _secret);
+    // ignore: avoid_print
+    print('GUESS: $guess → ${feedback.black}B ${feedback.white}W');
 
     _remaining = _remaining.where((code) {
       return GameEngine.computeFeedback(guess, code) == feedback;
     }).toList();
+    // ignore: avoid_print
+    print('REMAINING: ${_remaining.length}');
 
     setState(() {
       _guesses.add(GuessEntry(guess: guess, feedback: feedback));
@@ -69,14 +76,14 @@ class _HumanGuessesScreenState extends State<HumanGuessesScreen> {
     );
   }
 
-  Widget _buildDragHandle() {
+  Widget _buildDragHandle(double maxSlide) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onVerticalDragUpdate: (details) {
         setState(() {
           // Drag down → front slides down → reveals history
           _panelFraction =
-              (_panelFraction + details.primaryDelta! / _maxSlide)
+              (_panelFraction + details.primaryDelta! / maxSlide)
                   .clamp(0.0, 1.0);
         });
       },
@@ -110,6 +117,8 @@ class _HumanGuessesScreenState extends State<HumanGuessesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: avoid_print
+    print('BUILD: remaining=${_remaining.length}, guesses=${_guesses.length}');
     return Scaffold(
       appBar: AppBar(
         title: const Text('Crack the Code'),
@@ -200,7 +209,6 @@ class _HumanGuessesScreenState extends State<HumanGuessesScreen> {
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final maxH = constraints.maxHeight;
-                _maxSlide = maxH;
                 final slideOffset = maxH * _panelFraction;
 
                 return Stack(
@@ -243,7 +251,7 @@ class _HumanGuessesScreenState extends State<HumanGuessesScreen> {
                           ),
                           child: Column(
                             children: [
-                              _buildDragHandle(),
+                              _buildDragHandle(maxH),
                               Padding(
                                 padding: const EdgeInsets.fromLTRB(
                                     16, 0, 16, 16),
@@ -293,10 +301,10 @@ class _GuessRow extends StatelessWidget {
           const SizedBox(width: 16),
           const Text('→  ', style: TextStyle(fontSize: 18)),
           _feedbackChip(
-              fb.black, ' ✓', const Color(0xFF2E7D32), Colors.white),
+              fb.black, ' ✓', kFeedbackExactColor, Colors.white),
           const SizedBox(width: 6),
           _feedbackChip(
-              fb.white, ' ~', const Color(0xFFF57F17), Colors.white),
+              fb.white, ' ~', kFeedbackMisplacedColor, Colors.white),
         ],
       ),
     );
